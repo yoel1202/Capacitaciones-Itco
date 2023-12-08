@@ -1,0 +1,76 @@
+﻿@page "/actualizarCliente/{id}"
+@using webBlazor.Models
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<h3 class="mt-4 mb-4">Agregar Cliente</h3>
+
+<div class="container">
+
+    <form>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" @bind="cliente.Name" placeholder="Nombre" />
+        </div>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Cedula</label>
+            <input type="text" class="form-control" id="cedula" @bind="cliente.CardId" placeholder="Cedula" />
+        </div>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Email</label>
+            <input type="text" class="form-control" id="email" @bind="cliente.Email" placeholder="Email" />
+        </div>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Telefono</label>
+            <input type="text" class="form-control" id="telefono" @bind="cliente.Phone" placeholder="Telefono" />
+        </div>
+
+        <button type="button" class="btn btn-primary" @onclick="ActualizarCliente">Actualizar Cliente</button>
+    </form>
+</div>
+
+@code {
+    private Client cliente = new Client();
+    private int clienteId;
+
+    [Parameter]
+    public string Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (int.TryParse(Id, out int id))
+        {
+            clienteId = id;
+            HttpClient.BaseAddress = new Uri("https://localhost:7113/");
+            cliente = await HttpClient.GetFromJsonAsync<Client>($"api/client/{id}");
+            if (cliente == null)
+            {
+                NavigationManager.NavigateTo("/clientes");
+            }
+
+
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/clientes");
+        }
+
+    }
+
+    private async Task ActualizarCliente()
+    {
+        cliente.Id = clienteId;
+        HttpResponseMessage response = await HttpClient.PutAsJsonAsync("api/Client/Update", cliente);
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/clientes");
+        }
+        else
+        {
+            Console.WriteLine("error");
+        }
+    }
+    
+}

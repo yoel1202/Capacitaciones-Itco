@@ -1,0 +1,86 @@
+﻿@page "/clientes"
+@using webBlazor.Models
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+<!-- Agrega enlaces a Bootstrap CSS -->
+
+
+<h3>Listado de Clientes</h3>
+
+@if (clientes == null)
+{
+    <p>Cargando clientes...</p>
+}
+else
+{
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+
+                <th>Nombre</th>
+                <th>Cedula</th>
+                <th>Email</th>
+                <th>Telefono</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in clientes)
+            {
+                <tr>
+
+                    <td>@cliente.Name</td>
+                    <td>@cliente.CardId</td>
+                    <td>@cliente.Email</td>
+                    <td>@cliente.Phone</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => IrAActualizarCliente(cliente.Id)">Actualizar</button>
+                        <button class="btn btn-danger" @onclick="() => IrAEliminarCliente(cliente.Id)">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div>
+        <button class="btn btn-success" @onclick="IrAAgregarCliente">Agregar Cliente</button>
+    </div>
+}
+
+@code {
+    List<Client> clientes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        HttpClient.BaseAddress = new Uri("https://localhost:7113/");
+        clientes = await HttpClient.GetFromJsonAsync<List<Client>>("api/Client");
+    }
+
+    private void IrAAgregarCliente()
+    {
+        NavigationManager.NavigateTo("/agregarCliente");
+    }
+
+    private void IrAActualizarCliente(int clienteId)
+    {
+        NavigationManager.NavigateTo($"/actualizarCliente/{clienteId}");
+    }
+
+    private async void IrAEliminarCliente(int clienteId)
+    {
+        HttpResponseMessage response = await HttpClient.DeleteAsync($"/api/Client/Delete/{clienteId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Cliente eliminado exitosamente.");
+            await JSRuntime.InvokeVoidAsync("location.reload");
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Error al eliminar el cliente. Código de estado: {response.StatusCode}");
+        }
+
+    }
+}

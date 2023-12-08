@@ -1,0 +1,44 @@
+﻿@page "/agregarCliente"
+@using webBlazor.Models
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3 class="mt-4 mb-4">Agregar Cliente</h3>
+
+<div class="container">
+
+    <form>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" @bind="nuevoCliente.Name" placeholder="Nombre" />
+        </div>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Cedula</label>
+            <input type="text" class="form-control" id="cedula" @bind="nuevoCliente.CardId" placeholder="Cedula" />
+        </div>
+         <div class="mb-3">
+            <label for="nombre" class="form-label">Email</label>
+            <input type="text" class="form-control" id="email" @bind="nuevoCliente.Email" placeholder="Email" />
+        </div>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Telefono</label>
+            <input type="text" class="form-control" id="telefono" @bind="nuevoCliente.Phone" placeholder="Telefono" />
+        </div>
+
+        <button type="button" class="btn btn-primary" @onclick="AgregarNuevoCliente">Agregar Cliente</button>
+    </form>
+</div>
+
+@code {
+    private Client nuevoCliente = new Client();
+
+    private async Task AgregarNuevoCliente()
+    {
+        HttpClient.BaseAddress = new Uri("https://localhost:7113/");
+        HttpResponseMessage response = await HttpClient.PostAsJsonAsync("api/Client/Add", nuevoCliente);
+
+        NavigationManager.NavigateTo("/clientes");
+
+    }
+}
